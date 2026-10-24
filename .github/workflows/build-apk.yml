@@ -1,0 +1,65 @@
+name: Build APK from ZIP
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  HEV_REPO: https://github.com/heiher/hev-socks5-tunnel
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract source ZIP if provided
+        run: |
+          if [ -f SshVpn-review-fixed.zip ]; then
+            unzip -o SshVpn-review-fixed.zip
+          elif [ -f sshvpn-source-for-github.zip ]; then
+            unzip -o sshvpn-source-for-github.zip
+          elif [ -f source.zip ]; then
+            unzip -o source.zip
+          fi
+          if [ -d SshVpn ]; then
+            cp -a SshVpn/. .
+          fi
+
+      - name: Check Android source
+        run: |
+          test -f settings.gradle.kts || { echo "::error::Missing settings.gradle.kts. Upload SshVpn-review-fixed.zip or the contents of its SshVpn/ directory to the repository root."; exit 1; }
+          test -f app/build.gradle.kts || { echo "::error::Missing app/build.gradle.kts."; exit 1; }
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Build hev-socks5-tunnel native libraries
+        run: |
+          mkdir -p hev
+          git clone --recursive --depth 1 --shallow-submodules "$HEV_REPO" hev/jni
+          cd hev
+          "$ANDROID_NDK_HOME/ndk-build" NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=jni/Android.mk NDK_APPLICATION_MK=jni/Application.mk -j"$(nproc)"
+          for abi in arm64-v8a armeabi-v7a x86_64; do
+            mkdir -p ../app/src/main/jniLibs/$abi
+            cp libs/$abi/libhev-socks5-tunnel.so ../app/src/main/jniLibs/$abi/
+          done
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build debug APK
+        run: gradle assembleDebug --no-daemon
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ssh-tunnel-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error

@@ -1,0 +1,8 @@
+{
+  "name": "GodarmX SSH Tunnel VPN",
+  "description": "High-performance SSH Tunnel VPN manager and client supporting SSH-Direct, SSH-Proxy, SSH-TLS, and UDPGW with live traffic monitoring, profile manager, and connection diagnostics.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

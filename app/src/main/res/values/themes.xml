@@ -1,0 +1,3 @@
+<resources>
+    <style name="Theme.GodarmX" parent="android:Theme.Material.NoActionBar" />
+</resources>
