@@ -1,7 +1,9 @@
-.gradle/
+node_modules/
+dist/
 build/
-local.properties
-.idea/
-*.iml
-app/src/main/jniLibs/
-hev/
+.gradle/
+*.log
+.DS_Store
+.env
+.env.local
+.env.*.local

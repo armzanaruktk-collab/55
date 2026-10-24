@@ -97,6 +97,7 @@ export function App() {
   const [showProfileModal, setShowProfileModal] = useState<boolean>(false);
   const [showImportModal, setShowImportModal] = useState<boolean>(false);
   const [showConfirmDeleteAll, setShowConfirmDeleteAll] = useState<boolean>(false);
+  const [showGitHubModal, setShowGitHubModal] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Search & Ping states in Profiles tab
@@ -320,14 +321,23 @@ export function App() {
               {status.toUpperCase()}
             </span>
 
+            <button
+              onClick={() => setShowGitHubModal(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-black text-xs font-bold transition-all shadow-md cursor-pointer"
+              title="วิธีอัพลง GitHub เพื่อ Build APK"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span>อัพลง GitHub</span>
+            </button>
+
             <a
-              href="/sshvpn-source-for-github.zip"
-              download="sshvpn-source-for-github.zip"
+              href="/godarmx-sshvpn-github.zip"
+              download="godarmx-sshvpn-github.zip"
               className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 text-xs font-medium border border-emerald-700/40 transition-colors"
-              title="Download original Android source ZIP"
+              title="Download Android Source ZIP ready for GitHub"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Android ZIP</span>
+              <span>Source ZIP</span>
             </a>
           </div>
         </div>
@@ -1056,6 +1066,11 @@ export function App() {
           </div>
         </div>
       )}
+
+      {/* MODAL: GITHUB UPLOAD & APK BUILD GUIDE */}
+      {showGitHubModal && (
+        <GitHubModal onClose={() => setShowGitHubModal(false)} />
+      )}
     </div>
   );
 }
@@ -1485,4 +1500,147 @@ function ImportModal({
   );
 }
 
+// Modal Component for GitHub Upload & APK Build Instructions
+function GitHubModal({ onClose }: { onClose: () => void }) {
+  const [copiedCmd, setCopiedCmd] = useState<string | null>(null);
+
+  const gitCommands = [
+    '# 1. เชื่อมต่อกับ GitHub repository ของคุณ:',
+    'git remote add origin https://github.com/armzanaruktk-collab/Ssh.git',
+    '',
+    '# 2. ตั้งชื่อ branch หลักเป็น main:',
+    'git branch -M main',
+    '',
+    '# 3. Push ไฟล์ทั้งหมดขึ้น GitHub:',
+    'git push -u origin main',
+  ].join('\n');
+
+  const tokenCommand = 'git push https://<YOUR_GITHUB_TOKEN>@github.com/armzanaruktk-collab/Ssh.git main';
+
+  const copyToClipboard = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedCmd(id);
+    setTimeout(() => setCopiedCmd(null), 2500);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
+      <div className="bg-[#102417] border border-emerald-500/70 rounded-3xl p-6 max-w-xl w-full space-y-5 shadow-2xl my-8">
+        {/* Header */}
+        <div className="flex items-center justify-between pb-3 border-b border-emerald-800/40">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500 text-black flex items-center justify-center font-bold">
+              GH
+            </div>
+            <div>
+              <h3 className="font-bold text-base text-white">วิธีอัพโหลดขึ้น GitHub & Build APK</h3>
+              <p className="text-xs text-emerald-400 font-mono">armzanaruktk-collab / Ssh</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-white cursor-pointer text-sm">
+            ✕
+          </button>
+        </div>
+
+        {/* Content Body */}
+        <div className="space-y-4 max-h-[72vh] overflow-y-auto pr-1 text-xs text-slate-300">
+          {/* Method 1: Download & Upload ZIP */}
+          <div className="p-4 rounded-2xl bg-[#0b1f13] border border-emerald-700/50 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-emerald-300 text-sm">วิธีที่ 1: ดาวน์โหลดไฟล์ ZIP ที่จัดโครงสร้างสมบูรณ์แล้ว</span>
+              <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 text-[10px] font-mono border border-emerald-800">
+                ง่ายที่สุด
+              </span>
+            </div>
+            <p className="text-slate-400 leading-relaxed">
+              โครงสร้างไฟล์ Android (Gradle, JNI NDK build, Compose UI) พร้อม GitHub Actions workflow ถูกบรรจุไว้ในไฟล์นี้ครบ 100%:
+            </p>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <a
+                href="/godarmx-sshvpn-github.zip"
+                download="godarmx-sshvpn-github.zip"
+                className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold flex items-center gap-2 shadow-lg transition-all cursor-pointer"
+              >
+                <Download className="w-4 h-4" />
+                <span>ดาวน์โหลด godarmx-sshvpn-github.zip</span>
+              </a>
+            </div>
+            <ol className="list-decimal list-inside space-y-1 text-slate-400 pt-1">
+              <li>แตกไฟล์ ZIP ลงในโฟลเดอร์ในเครื่องของคุณ</li>
+              <li>เปิดเบราว์เซอร์ไปที่ <a href="https://github.com/armzanaruktk-collab/Ssh" target="_blank" rel="noreferrer" className="text-emerald-400 underline font-mono">github.com/armzanaruktk-collab/Ssh</a></li>
+              <li>กด <strong>Add file</strong> → <strong>Upload files</strong> แล้วลากไฟล์ทั้งหมดลงไป แล้วกด Commit changes</li>
+            </ol>
+          </div>
+
+          {/* Method 2: Git Command Line */}
+          <div className="p-4 rounded-2xl bg-[#0b1f13] border border-emerald-700/50 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-emerald-300 text-sm">วิธีที่ 2: ใช้คำสั่ง Git ในคอมพิวเตอร์ของคุณ</span>
+              <button
+                onClick={() => copyToClipboard(gitCommands, 'main-cmd')}
+                className="px-2.5 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-900 border border-emerald-700/60 text-emerald-300 text-[11px] flex items-center gap-1 cursor-pointer transition-colors"
+              >
+                {copiedCmd === 'main-cmd' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedCmd === 'main-cmd' ? 'คัดลอกแล้ว!' : 'คัดลอกคำสั่ง'}</span>
+              </button>
+            </div>
+            <pre className="p-3 bg-[#07130b] border border-emerald-900/60 rounded-xl font-mono text-[11px] text-emerald-300 overflow-x-auto whitespace-pre leading-relaxed">
+              {gitCommands}
+            </pre>
+            <div className="space-y-1 text-slate-400">
+              <p>หาก GitHub ถามรหัสผ่าน ให้ใช้ <strong>Personal Access Token (Classic)</strong> แทนรหัสผ่านปกติ:</p>
+              <div className="flex items-center justify-between p-2 rounded-lg bg-[#07130b] border border-emerald-900/40 font-mono text-[10px]">
+                <span className="text-slate-300 truncate">{tokenCommand}</span>
+                <button
+                  onClick={() => copyToClipboard(tokenCommand, 'token-cmd')}
+                  className="ml-2 text-emerald-400 hover:underline shrink-0 cursor-pointer"
+                >
+                  {copiedCmd === 'token-cmd' ? 'คัดลอกแล้ว' : 'คัดลอก'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Automatic APK Build explanation */}
+          <div className="p-4 rounded-2xl bg-[#12281a] border border-emerald-600/40 space-y-2">
+            <div className="font-bold text-emerald-300 flex items-center gap-1.5">
+              <Zap className="w-4 h-4 text-emerald-400" />
+              <span>การสร้างไฟล์ APK อัตโนมัติ (GitHub Actions)</span>
+            </div>
+            <p className="leading-relaxed text-slate-300">
+              เมื่อไฟล์ถูกอัพโหลดขึ้น branch <code>main</code> แล้ว:
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-slate-400">
+              <li>ระบบ GitHub Actions จะเริ่มทำงานไฟล์ <code>.github/workflows/build-apk.yml</code> ทันที</li>
+              <li>ระบบจะคอมไพล์ไลบรารีเนทีฟ <code>libhev-socks5-tunnel.so</code> ด้วย Android NDK</li>
+              <li>ระบบจะรัน Gradle และสร้างไฟล์ <code>app/build/outputs/apk/debug/app-debug.apk</code></li>
+              <li>ไปที่แท็บ <strong>Actions</strong> บนหน้า GitHub ของคุณ แล้วกดดาวน์โหลดที่ส่วน <strong>Artifacts (ssh-tunnel-debug-apk)</strong></li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-3 border-t border-emerald-800/40">
+          <a
+            href="https://github.com/armzanaruktk-collab/Ssh"
+            target="_blank"
+            rel="noreferrer"
+            className="text-emerald-400 hover:text-emerald-300 text-xs font-semibold flex items-center gap-1"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>เปิดหน้า GitHub Repository</span>
+          </a>
+          <button
+            onClick={onClose}
+            className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-black font-bold text-xs cursor-pointer transition-colors"
+          >
+            ปิดหน้าต่าง
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default App;
+
